@@ -1,75 +1,75 @@
 # Crônicas — RPG de mesa
 
-RPG narrativo de fantasia que roda diretamente no navegador. Crie um personagem, distribua atributos, escolha classe e talentos, escreva suas próprias ações e deixe os dados resolverem os momentos incertos.
+**Crie seu herói, explore um mundo de fantasia e escreva sua própria aventura.**  
+Crônicas é um RPG de mesa que roda no navegador: você descreve o que quer fazer, e o jogo resolve testes, combate e consequências.
 
-## Jogar
+## 🎮 Jogar agora
 
-- Abra o arquivo `index.html` localmente, ou publique o repositório com GitHub Pages.
-- O jogo salva o progresso automaticamente neste navegador.
-- Use **Exportar save** para baixar uma cópia em JSON e **Importar save** para restaurá-la em outro navegador ou dispositivo.
+### **[▶ Abrir Crônicas no navegador](https://nik0lasdev.github.io/RPG-IA/)**
 
-## Sistemas implementados
+Não precisa instalar nada. Abra o link acima em um navegador atualizado e comece uma nova campanha.
 
-- **Criação de personagem:** seis classes, cinco origens, atributos distribuídos por pontos, passado opcional e duas habilidades iniciais.
-- **Ações livres:** escreva intenções com suas próprias palavras. O jogo interpreta categorias de ação, escolhe o atributo apropriado e resolve um teste.
-- **Dados:** D2 para decisões binárias, D6 para acontecimentos rápidos, D20 para testes de ação e D100 para chances percentuais. Os dados também podem ser rolados manualmente.
-- **Combate por turnos:** atacar, usar magia, defender/esquivar, tentar negociar ou fugir; inimigos causam dano e oferecem recompensas.
-- **Campanhas diferentes:** quatro tons de campanha, sementes e objetivos principais com etapas, além de locais, rumores, encontros e personagens.
-- **Progressão:** experiência, níveis, atributos, energia, vida, ouro e inventário.
-- **Pós-jogo contínuo:** após concluir o objetivo principal, o jogo passa a gerar contratos, encontros e situações recorrentes. O personagem pode continuar subindo de nível e treinar atributos com mentores.
-- **Persistência local:** o progresso fica em `localStorage`, com exportação e importação manual.
+> Se a página não abrir, tente novamente em alguns minutos. O jogo precisa estar publicado corretamente no GitHub Pages para que o link funcione.
 
-## Controles
+## 🚀 Como começar
 
-- **O que você faz?** Digite uma ação livre ou escolha uma sugestão.
-- **Dados de mesa:** clique em D2, D6, D20 ou D100 para rolar o dado.
-- **Ficha do herói:** consulte atributos, habilidades e recursos.
-- **Explorar o mundo:** viaje para outras regiões e encontre novas situações.
-- **Descansar:** recupera vida e energia, avançando o tempo.
+1. Abra o jogo pelo link acima.
+2. Crie seu personagem: escolha uma classe, uma origem e distribua os atributos disponíveis.
+3. Escolha o tom da campanha e comece sua aventura.
+4. Leia a situação narrada e decida o que seu personagem fará.
+5. Digite sua ação com suas próprias palavras ou escolha uma das sugestões disponíveis.
+6. Acompanhe os testes, resultados, recursos e mudanças na história.
 
-## Publicar no GitHub Pages
+## 🧭 O que você pode fazer?
 
-O repositório inclui um workflow em `.github/workflows/pages.yml` para publicar os arquivos estáticos ao enviar commits para `main`. Em **Settings → Pages**, selecione **GitHub Actions** como fonte de publicação. O GitHub Pages hospeda arquivos estáticos; o jogo não requer servidor nem dependências de build.
+- **Explorar:** viajar por regiões e descobrir lugares, rumores e encontros.
+- **Conversar:** falar com personagens e tentar negociar, investigar ou conseguir ajuda.
+- **Lutar:** enfrentar inimigos por turnos, atacar, usar magia, defender-se ou tentar fugir.
+- **Evoluir:** ganhar experiência, subir de nível, melhorar atributos e obter recompensas.
+- **Continuar a campanha:** depois de concluir o objetivo principal, seguir jogando com novos contratos e acontecimentos.
+- **Rolar dados:** usar os dados D2, D6, D20 e D100 disponíveis na interface.
 
-A URL esperada do projeto é:
+### Dica para ações livres
 
-https://nik0lasdev.github.io/RPG-IA/
+Descreva sua intenção e, quando for útil, como pretende realizá-la. Por exemplo:
 
-## Mestre com IA generativa (opcional)
+- “Examino a porta em busca de armadilhas.”
+- “Tento convencer a guarda de que tenho autorização.”
+- “Uso o ambiente para me proteger enquanto ataco.”
+- “Pergunto ao comerciante quem esteve aqui ontem.”
 
-O jogo agora pode usar um modelo de linguagem compatível com a API de **chat completions** para narrar cenas com mais contexto, interpretar a intenção do jogador, manter fatos recorrentes da campanha e sugerir ações coerentes. O sistema de regras local continua controlando atributos, testes, combate, vida, inventário e recompensas; a IA não deve inventar alterações mecânicas.
+O resultado depende da situação, das regras do jogo, dos atributos e dos testes. Uma tentativa não garante sucesso.
 
-1. Inicie uma campanha e abra **Mestre IA** no cabeçalho da tela de jogo.
-2. Informe o endpoint HTTPS do provedor, o identificador do modelo e sua chave de API.
-3. Clique em **Testar conexão** e, se funcionar, em **Ativar mestre IA**.
-4. Faça ações normalmente. A IA interpreta a intenção antes da resolução e depois devolve narração, três sugestões e atualizações de memória estruturada.
+## 🤖 Mestre com IA (opcional)
 
-O endpoint inicial é o da OpenRouter e o modelo sugerido é `openai/gpt-4o-mini`; ambos podem ser alterados para outro provedor/modelo compatível. O provedor escolhido precisa permitir chamadas do navegador via CORS e aceitar o formato de chat completions. Uso de API pode gerar custos cobrados pelo provedor.
+O jogo pode funcionar com o mestre local, sem configurar uma API. Para experimentar narração generativa:
 
-### Memória persistente da campanha
+1. Inicie uma campanha.
+2. Abra **Mestre IA** na tela do jogo.
+3. Informe o endpoint do provedor, o modelo e uma chave de API compatível.
+4. Clique em **Testar conexão** e, se funcionar, em **Ativar mestre IA**.
 
-A campanha mantém um **cronicário estruturado** no save local, em vez de depender apenas das últimas mensagens. Ele organiza:
-- resumo canônico da história;
-- NPCs, facções, locais, objetos e ameaças recorrentes;
-- relações entre personagens, alianças, rivalidades e mudanças de estado;
-- fatos, pistas, promessas, dívidas e informações com grau de certeza;
-- fios narrativos abertos, em andamento, resolvidos ou abandonados;
-- linha do tempo dos turnos e resultados registrados pelo jogo.
+O endpoint inicial é o da OpenRouter e o modelo sugerido é `openai/gpt-4o-mini`; você pode usar outro provedor compatível com a API de chat completions. O provedor precisa permitir requisições feitas pelo navegador (CORS).
 
-A cada turno, o jogo registra a ação e as consequências mecânicas na linha do tempo. Quando a IA está ativa, ela também atualiza entidades, relações, fatos e tramas; antes de narrar, recebe uma seleção de memórias relevantes, o resumo canônico e os acontecimentos recentes. Saves antigos são migrados automaticamente para a nova estrutura, e o cronicário acompanha a exportação/importação do save.
+**Atenção:** o uso de uma API pode gerar cobranças pelo provedor. A chave é usada no navegador e fica na sessão atual; não use uma chave importante ou sem limite de gastos. Não é necessário configurar a IA para jogar.
 
-A memória é limitada por categoria para controlar o tamanho do contexto, mantendo um resumo e registros recentes. Como o jogo é estático, o cronicário fica no navegador e **não sincroniza automaticamente entre dispositivos**. Exporte o save para fazer backup ou transferi-lo. Nenhum modelo garante lembrança perfeita: a qualidade depende do modelo, do contexto disponível e das respostas produzidas. Para maior privacidade e confiabilidade em uso público, um backend com banco de dados e validação no servidor seria o próximo passo.
+Quando ativada, a IA ajuda a interpretar suas intenções, narrar cenas e sugerir ações. As regras locais continuam responsáveis por resolver os sistemas mecânicos do jogo.
 
-### Segurança da chave
+## 💾 Salvamento e continuidade
 
-A chave não é gravada no repositório nem no save do jogo: fica em `sessionStorage`, para a sessão atual do navegador. Ainda assim, uma chave usada no navegador pode ser acessada por extensões ou scripts executados na página. Use uma chave com limite de gastos e permissões mínimas. **Para publicar o jogo para outras pessoas, a solução recomendada é um backend próprio**, com a chave guardada no servidor e limites de uso. Não coloque chaves secretas em arquivos JavaScript ou no GitHub Pages.
+- O jogo salva seu progresso automaticamente no navegador utilizado.
+- Use **Exportar save** para baixar uma cópia de segurança.
+- Use **Importar save** para restaurar uma campanha salva.
+- A memória da campanha registra acontecimentos, personagens, relações e tramas para ajudar a manter a continuidade, especialmente com o mestre IA ativo.
 
-Sem chave ou quando o provedor estiver indisponível, o jogo continua funcionando com o mestre local.
+**Importante:** o save fica neste navegador e não é sincronizado automaticamente entre dispositivos. Exporte-o regularmente se quiser proteger seu progresso ou transferi-lo para outro computador. A memória ajuda na continuidade, mas não garante que a IA se lembre perfeitamente de todos os detalhes.
 
-## Desenvolvimento
+## 🛠️ Problemas ou sugestões
 
-Sem dependências externas de JavaScript. Estrutura:
-- `index.html` — estrutura da interface
-- `styles.css` — estilo responsivo
-- `game.js` — regras, narrativa, dados, combate e salvamento
-- `.github/workflows/pages.yml` — publicação no GitHub Pages
+Se encontrar um erro, informe o que estava fazendo, o que esperava que acontecesse e o que aconteceu de fato. Se possível, inclua uma captura de tela e a mensagem de erro do navegador. Isso ajuda a investigar o problema.
+
+## Sobre o projeto
+
+Crônicas é um RPG de fantasia para navegador, sem instalação nem dependências de build. O progresso é armazenado localmente; o mestre com IA é um recurso opcional.
+
+**Divirta-se — e lembre-se: você decide o que tentar. O mundo responde às suas escolhas.**
