@@ -386,7 +386,7 @@ REGRAS IMPORTANTES:
       const response = await fetch(aiConfig.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
-        body: JSON.stringify({ model: aiConfig.model, temperature: 0.85, max_tokens: 450, messages: [
+        body: JSON.stringify({ model: aiConfig.model, temperature: 0.75, max_tokens: 1100, messages: [
           { role: "system", content: system },
           { role: "user", content: "Contexto atual da campanha em JSON:\n" + JSON.stringify(aiContext(action)) }
         ] })
@@ -535,6 +535,7 @@ REGRAS IMPORTANTES:
     if (!action) return;
     if (game.character.hp <= 0) { addStory("Você está incapacitado. Descanse para se recuperar antes de tentar outra ação.", "system"); renderGame(); return; }
     game.turns++;
+    const turnLogStart = game.log.length;
     game.lastAction = action;
     addStory(action, "player", game.character.name.toUpperCase());
     if (game.combat) {
@@ -560,6 +561,12 @@ REGRAS IMPORTANTES:
       else freeAction(action, aiPlan?.attribute);
     }
     advanceTime();
+    const chronicle = ensureChronicle();
+    if (chronicle) {
+      const turnSummary = game.log.slice(turnLogStart).map(entry => (entry.label ? entry.label + ": " : "") + entry.text).join(" | ").slice(0, 480);
+      chronicle.timeline = mergeMemoryItems(chronicle.timeline, [{ summary: turnSummary, location: game.location, day: String(game.day) }], ["summary"], CHRONICLE_LIMITS.timeline, ["summary", "location", "day"]);
+      chronicle.updatedTurn = game.turns;
+    }
     persist();
     renderGame();
   }
