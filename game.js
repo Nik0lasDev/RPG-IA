@@ -354,12 +354,36 @@ REGRAS IMPORTANTES:
     }
   }
 
+  const AI_INTENTS = new Set(["potion","rest","flee","attack","explore","investigate","social","magic","trade","defend","negotiate","contract","train","free"]);
+  const AI_ATTRIBUTES = new Set(["forca","agilidade","intelecto","presenca","vigor"]);
+
+  async function classifyPlayerAction(action) {
+    const key = sessionStorage.getItem("cronicas-rpg-ai-key");
+    if (!aiConfig.enabled || !key || !game) return null;
+    try {
+      const response = await fetch(aiConfig.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+        body: JSON.stringify({ model: aiConfig.model, temperature: 0.1, max_tokens: 120, messages: [
+          { role: "system", content: 'Classifique a intenção da ação de um jogador de RPG. Responda SOMENTE JSON: {"intent":"...","attribute":"..."}. intents permitidas: potion, rest, flee, attack, explore, investigate, social, magic, trade, defend, negotiate, contract, train, free. Atributos permitidos: forca, agilidade, intelecto, presenca, vigor. Use o contexto de combate. Não invente ações, não determine sucesso, dificuldade, dano, recompensas nem altere estado. "attack" é ataque físico; magia ofensiva é "magic"; conversar com inimigo para fazê-lo recuar é "negotiate". Se não houver categoria clara, use "free". Escolha o atributo mais adequado à abordagem declarada.' },
+          { role: "user", content: JSON.stringify({ action, combat: game.combat ? { enemy: game.combat.enemy, enemyHp: game.combat.enemyHp } : null, character: { class: CLASSES[game.character.classId].name, attributes: game.character.attributes, skills: game.character.skills }, postgame: game.postgame }) }
+        ] })
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      const parsed = parseAiJson(data.choices?.[0]?.message?.content);
+      if (!AI_INTENTS.has(parsed.intent) || !AI_ATTRIBUTES.has(parsed.attribute)) return null;
+      return { intent: parsed.intent, attribute: parsed.attribute };
+    } catch { return null; }
+  }
+
   async function submitPlayerAction(action) {
     if (!action.trim() || aiBusy) {
       if (aiBusy) showToast("Aguarde o mestre IA terminar a cena.");
       return;
     }
-    processAction(action);
+    const plan = await classifyPlayerAction(action);
+    processAction(action, plan);
     await requestAiNarration(action);
   }
 
@@ -432,7 +456,7 @@ REGRAS IMPORTANTES:
     return check + (result.success ? " Você consegue." : " Você não consegue por enquanto, e a situação muda.");
   }
 
-  function processAction(rawAction) {
+  function processAction(rawAction, aiPlan = null) {
     if (!game) return;
     const action = rawAction.trim();
     if (!action) return;
@@ -441,22 +465,22 @@ REGRAS IMPORTANTES:
     game.lastAction = action;
     addStory(action, "player", game.character.name.toUpperCase());
     if (game.combat) {
-      resolveCombatAction(action);
+      resolveCombatAction(action, aiPlan);
     } else {
       const lower = action.toLowerCase();
-      if (/poção|pocao|curar|me curar|usar.*cura/.test(lower)) usePotion();
-      else if (/descans|dormir|acampar|recuperar/.test(lower)) rest(true);
-      else if (/fugir|sair correndo|escapar/.test(lower)) {
+      if (aiPlan?.intent === "potion" || /poção|pocao|curar|me curar|usar.*cura/.test(lower)) usePotion();
+      else if (aiPlan?.intent === "rest" || /descans|dormir|acampar|recuperar/.test(lower)) rest(true);
+      else if (aiPlan?.intent === "flee" || /fugir|sair correndo|escapar/.test(lower)) {
         const result = testAction(action, "agilidade", 10);
         addStory(testNarration(result, action, "agilidade") + (result.success ? " Você se afasta e encontra uma rota mais segura." : " Você não encontra uma saída fácil."));
         if (result.success) moveLocation();
         advanceTime();
-      } else if (/atac|inimig|monstro|bandido|lutar|combate|emboscad/.test(lower)) beginEncounter();
-      else if (/explor|viaj|ir para|viajar|seguir para|visitar|sair da cidade|novo lugar/.test(lower)) explore(action);
-      else if (/investig|pista|examinar|procur|observar|inspecion|pesquis|vasculh|olhar/.test(lower)) investigate(action);
-      else if (/convers|falar|negoci|convenc|pergunt|persuad|ameaç|blef|mentir|pedir ajuda/.test(lower)) socialAction(action);
-      else if (/magia|feiti|encant|runa|ritual|arcana/.test(lower)) magicAction(action);
-      else if (/compr|vender|loja|mercador|trocar/.test(lower)) tradeAction(action);
+      } else if (aiPlan?.intent === "attack" || /atac|inimig|monstro|bandido|lutar|combate|emboscad/.test(lower)) beginEncounter();
+      else if (aiPlan?.intent === "explore" || /explor|viaj|ir para|viajar|seguir para|visitar|sair da cidade|novo lugar/.test(lower)) explore(action);
+      else if (aiPlan?.intent === "investigate" || /investig|pista|examinar|procur|observar|inspecion|pesquis|vasculh|olhar/.test(lower)) investigate(action);
+      else if (aiPlan?.intent === "social" || /convers|falar|negoci|convenc|pergunt|persuad|ameaç|blef|mentir|pedir ajuda/.test(lower)) socialAction(action, aiPlan?.attribute);
+      else if (aiPlan?.intent === "magic" || /magia|feiti|encant|runa|ritual|arcana/.test(lower)) magicAction(action);
+      else if (aiPlan?.intent === "trade" || /compr|vender|loja|mercador|trocar/.test(lower)) tradeAction(action);
       else if (game.postgame) postgameAction(action);
       else freeAction(action);
     }
@@ -504,8 +528,8 @@ REGRAS IMPORTANTES:
     }
   }
 
-  function socialAction(action) {
-    const attribute = attributeFor(action);
+  function socialAction(action, plannedAttribute = null) {
+    const attribute = AI_ATTRIBUTES.has(plannedAttribute) ? plannedAttribute : attributeFor(action);
     const difficulty = /ameaç|intimid|blef|mentir/.test(action.toLowerCase()) ? 13 : 11;
     const result = testAction(action, attribute, difficulty);
     addStory(testNarration(result, action, attribute));
@@ -603,7 +627,7 @@ REGRAS IMPORTANTES:
     }
   }
 
-  function resolveCombatAction(action) {
+  function resolveCombatAction(action, aiPlan = null) {
     const combat = game.combat;
     const c = game.character;
     const lower = action.toLowerCase();
@@ -612,38 +636,38 @@ REGRAS IMPORTANTES:
       addStory("O combate terminou. Você pode examinar o local ou seguir viagem.", "system");
       return;
     }
-    if (/poção|pocao|curar/.test(lower)) { usePotion(); if (game.combat && combat.enemyHp > 0) enemyTurn(); return; }
-    if (/fugir|escapar|correr/.test(lower)) {
-      const escape = testAction(action, "agilidade", 12);
+    if (aiPlan?.intent === "potion" || /poção|pocao|curar/.test(lower)) { usePotion(); if (game.combat && combat.enemyHp > 0) enemyTurn(); return; }
+    if (aiPlan?.intent === "flee" || /fugir|escapar|correr/.test(lower)) {
+      const escape = testAction(action, aiPlan?.attribute || "agilidade", 12);
       addStory(testNarration(escape, action, "agilidade"));
       if (escape.success) { addStory("Você se afasta do combate e desaparece pelo caminho."); game.combat = null; moveLocation(); addEvent("Escapou de um combate."); }
       else { addStory("O inimigo bloqueia sua rota."); enemyTurn(); }
       return;
     }
-    if (/negoci|convers|persuad|ameaç|intimid|distrair|engan/.test(lower)) {
-      const attr = /ameaç|intimid/.test(lower) ? "forca" : "presenca";
+    if (aiPlan?.intent === "negotiate" || aiPlan?.intent === "social" || /negoci|convers|persuad|ameaç|intimid|distrair|engan/.test(lower)) {
+      const attr = aiPlan?.attribute || (/ameaç|intimid/.test(lower) ? "forca" : "presenca");
       const result = testAction(action, attr, 13);
       addStory(testNarration(result, action, attr));
       if (result.success) { addStory("O inimigo hesita e recua. Você encerra o confronto sem precisar derrotá-lo."); game.combat = null; gainXp(5); }
       else { addStory("A tentativa não convence a criatura."); enemyTurn(); }
       return;
     }
-    if (/esquiv|defend|bloque|observar|esperar|prepar/.test(lower)) {
-      const result = testAction(action, "agilidade", 11);
+    if (aiPlan?.intent === "defend" || /esquiv|defend|bloque|observar|esperar|prepar/.test(lower)) {
+      const result = testAction(action, aiPlan?.attribute || "agilidade", 11);
       addStory(testNarration(result, action, "agilidade"));
       if (result.success) { addStory("Você evita o golpe e identifica uma abertura para o próximo turno."); combat.opening = true; }
       else enemyTurn();
       return;
     }
-    if (/magia|feiti|arcana|raio|encant/.test(lower) && c.energy >= 2) {
+    if ((aiPlan?.intent === "magic" || /magia|feiti|arcana|raio|encant/.test(lower)) && c.energy >= 2) {
       c.energy -= 2;
-      const result = testAction(action, "intelecto", 12);
+      const result = testAction(action, aiPlan?.attribute || "intelecto", 12);
       addStory(testNarration(result, action, "intelecto"));
       if (result.success) damageEnemy(6 + c.attributes.intelecto + (result.critical ? 5 : 0));
       if (combat.enemyHp > 0) enemyTurn();
       return;
     }
-    const attr = attributeFor(action);
+    const attr = aiPlan?.attribute || attributeFor(action);
     const result = testAction(action, attr, 11 + Math.floor(combat.turns / 3));
     addStory(testNarration(result, action, attr));
     if (result.success) {
