@@ -42,9 +42,23 @@ O jogo agora pode usar um modelo de linguagem compatível com a API de **chat co
 1. Inicie uma campanha e abra **Mestre IA** no cabeçalho da tela de jogo.
 2. Informe o endpoint HTTPS do provedor, o identificador do modelo e sua chave de API.
 3. Clique em **Testar conexão** e, se funcionar, em **Ativar mestre IA**.
-4. Faça ações normalmente. A IA recebe um resumo do personagem, estado da campanha e histórico recente, e devolve narração e três sugestões contextuais.
+4. Faça ações normalmente. A IA interpreta a intenção antes da resolução e depois devolve narração, três sugestões e atualizações de memória estruturada.
 
 O endpoint inicial é o da OpenRouter e o modelo sugerido é `openai/gpt-4o-mini`; ambos podem ser alterados para outro provedor/modelo compatível. O provedor escolhido precisa permitir chamadas do navegador via CORS e aceitar o formato de chat completions. Uso de API pode gerar custos cobrados pelo provedor.
+
+### Memória persistente da campanha
+
+A campanha mantém um **cronicário estruturado** no save local, em vez de depender apenas das últimas mensagens. Ele organiza:
+- resumo canônico da história;
+- NPCs, facções, locais, objetos e ameaças recorrentes;
+- relações entre personagens, alianças, rivalidades e mudanças de estado;
+- fatos, pistas, promessas, dívidas e informações com grau de certeza;
+- fios narrativos abertos, em andamento, resolvidos ou abandonados;
+- linha do tempo dos turnos e resultados registrados pelo jogo.
+
+A cada turno, o jogo registra a ação e as consequências mecânicas na linha do tempo. Quando a IA está ativa, ela também atualiza entidades, relações, fatos e tramas; antes de narrar, recebe uma seleção de memórias relevantes, o resumo canônico e os acontecimentos recentes. Saves antigos são migrados automaticamente para a nova estrutura, e o cronicário acompanha a exportação/importação do save.
+
+A memória é limitada por categoria para controlar o tamanho do contexto, mantendo um resumo e registros recentes. Como o jogo é estático, o cronicário fica no navegador e **não sincroniza automaticamente entre dispositivos**. Exporte o save para fazer backup ou transferi-lo. Nenhum modelo garante lembrança perfeita: a qualidade depende do modelo, do contexto disponível e das respostas produzidas. Para maior privacidade e confiabilidade em uso público, um backend com banco de dados e validação no servidor seria o próximo passo.
 
 ### Segurança da chave
 
