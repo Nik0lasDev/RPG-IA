@@ -35,9 +35,22 @@ A URL esperada do projeto é:
 
 https://nik0lasdev.github.io/RPG-IA/
 
-## Limites atuais
+## Mestre com IA generativa (opcional)
 
-A interpretação de texto é feita por regras locais e palavras-chave; não usa um modelo de IA externo nem requer chave de API. As respostas são narrativas procedurais, não um mestre de mesa generativo de linguagem natural. O pós-jogo pode continuar indefinidamente através de contratos e situações combinadas, mas o conteúdo é gerado a partir de conjuntos e regras do próprio jogo.
+O jogo agora pode usar um modelo de linguagem compatível com a API de **chat completions** para narrar cenas com mais contexto, interpretar a intenção do jogador, manter fatos recorrentes da campanha e sugerir ações coerentes. O sistema de regras local continua controlando atributos, testes, combate, vida, inventário e recompensas; a IA não deve inventar alterações mecânicas.
+
+1. Inicie uma campanha e abra **Mestre IA** no cabeçalho da tela de jogo.
+2. Informe o endpoint HTTPS do provedor, o identificador do modelo e sua chave de API.
+3. Clique em **Testar conexão** e, se funcionar, em **Ativar mestre IA**.
+4. Faça ações normalmente. A IA recebe um resumo do personagem, estado da campanha e histórico recente, e devolve narração e três sugestões contextuais.
+
+O endpoint inicial é o da OpenRouter e o modelo sugerido é `openai/gpt-4o-mini`; ambos podem ser alterados para outro provedor/modelo compatível. O provedor escolhido precisa permitir chamadas do navegador via CORS e aceitar o formato de chat completions. Uso de API pode gerar custos cobrados pelo provedor.
+
+### Segurança da chave
+
+A chave não é gravada no repositório nem no save do jogo: fica em `sessionStorage`, para a sessão atual do navegador. Ainda assim, uma chave usada no navegador pode ser acessada por extensões ou scripts executados na página. Use uma chave com limite de gastos e permissões mínimas. **Para publicar o jogo para outras pessoas, a solução recomendada é um backend próprio**, com a chave guardada no servidor e limites de uso. Não coloque chaves secretas em arquivos JavaScript ou no GitHub Pages.
+
+Sem chave ou quando o provedor estiver indisponível, o jogo continua funcionando com o mestre local.
 
 ## Desenvolvimento
 
