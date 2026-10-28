@@ -282,7 +282,7 @@
     return m;
   }
 
-  function memoryKey(value) { return String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  function memoryKey(value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 
   function mergeMemoryItems(existing, incoming, keyFields, limit, allowedFields) {
     const list = existing.slice();
@@ -546,7 +546,7 @@ REGRAS IMPORTANTES:
       else if (aiPlan?.intent === "rest" || /descans|dormir|acampar|recuperar/.test(lower)) rest(true);
       else if (aiPlan?.intent === "flee" || /fugir|sair correndo|escapar/.test(lower)) {
         const result = testAction(action, aiPlan?.attribute || "agilidade", 10);
-        addStory(testNarration(result, action, "agilidade") + (result.success ? " Você se afasta e encontra uma rota mais segura." : " Você não encontra uma saída fácil."));
+        addStory(testNarration(result, action, aiPlan?.attribute || "agilidade") + (result.success ? " Você se afasta e encontra uma rota mais segura." : " Você não encontra uma saída fácil."));
         if (result.success) moveLocation();
         advanceTime();
       } else if (aiPlan?.intent === "attack" || /atac|inimig|monstro|bandido|lutar|combate|emboscad/.test(lower)) beginEncounter();
