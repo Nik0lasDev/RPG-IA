@@ -221,6 +221,7 @@
   const AI_CONFIG_KEY = "cronicas-rpg-ai-config-v1";
   let aiConfig = { endpoint: "https://openrouter.ai/api/v1/chat/completions", model: "openai/gpt-4o-mini", style: "balanced", enabled: false };
   let aiBusy = false;
+  let actionSubmitting = false;
   let aiRequestId = 0;
 
   function loadAiConfig() {
@@ -378,13 +379,18 @@ REGRAS IMPORTANTES:
   }
 
   async function submitPlayerAction(action) {
-    if (!action.trim() || aiBusy) {
-      if (aiBusy) showToast("Aguarde o mestre IA terminar a cena.");
+    if (!action.trim() || aiBusy || actionSubmitting) {
+      if (aiBusy || actionSubmitting) showToast("Aguarde a resolução da ação atual.");
       return;
     }
-    const plan = await classifyPlayerAction(action);
-    processAction(action, plan);
-    await requestAiNarration(action);
+    actionSubmitting = true;
+    try {
+      const plan = await classifyPlayerAction(action);
+      processAction(action, plan);
+      await requestAiNarration(action);
+    } finally {
+      actionSubmitting = false;
+    }
   }
 
   function renderSuggestions() {
