@@ -409,9 +409,20 @@
     if (result.success) {
       moveLocation();
       addStory(`Após um trecho de viagem, você chega a ${game.location}. ${pick(["Há vozes vindo de uma estalagem.", "Marcas recentes cruzam o caminho.", "O vento traz cheiro de chuva e fumaça.", "Um viajante observa você de longe.", "Uma construção antiga aparece entre as árvores."])}`);
+      const fortune = roll(100);
+      if (fortune <= 8) {
+        addStory(`Sorte extraordinária (D100: ${fortune}/100): você encontra uma relíquia rara esquecida neste lugar.`);
+        addItem({ name: "Relíquia antiga", count: 1 });
+        game.character.gold += 15;
+      } else if (fortune <= 28) {
+        addStory(`Você encontra suprimentos no caminho (D100: ${fortune}/100).`);
+        addItem(pick([{ name: "Erva medicinal", count: 1 }, { name: "Ração de viagem", count: 2 }, { name: "Moedas antigas", count: 1 }]));
+      } else {
+        addStory(`Nenhum achado especial desta vez (D100: ${fortune}/100).`);
+      }
       if (game.postgame) { generateContract(); }
       else if (!game.quest.complete && rand(2) === 0) progressQuest("Uma nova região abriu possibilidades para a investigação.");
-      if (rand(3) === 0) startEncounter(false);
+      if (roll(6) === 1) startEncounter(false);
       gainXp(4);
     } else {
       addStory("O caminho se fecha entre lama, neblina ou viajantes desconfiados. Você não avançou, mas percebeu que a região esconde riscos.");
