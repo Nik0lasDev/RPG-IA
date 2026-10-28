@@ -471,26 +471,28 @@ REGRAS IMPORTANTES:
       if (aiPlan?.intent === "potion" || /poção|pocao|curar|me curar|usar.*cura/.test(lower)) usePotion();
       else if (aiPlan?.intent === "rest" || /descans|dormir|acampar|recuperar/.test(lower)) rest(true);
       else if (aiPlan?.intent === "flee" || /fugir|sair correndo|escapar/.test(lower)) {
-        const result = testAction(action, "agilidade", 10);
+        const result = testAction(action, aiPlan?.attribute || "agilidade", 10);
         addStory(testNarration(result, action, "agilidade") + (result.success ? " Você se afasta e encontra uma rota mais segura." : " Você não encontra uma saída fácil."));
         if (result.success) moveLocation();
         advanceTime();
       } else if (aiPlan?.intent === "attack" || /atac|inimig|monstro|bandido|lutar|combate|emboscad/.test(lower)) beginEncounter();
-      else if (aiPlan?.intent === "explore" || /explor|viaj|ir para|viajar|seguir para|visitar|sair da cidade|novo lugar/.test(lower)) explore(action);
-      else if (aiPlan?.intent === "investigate" || /investig|pista|examinar|procur|observar|inspecion|pesquis|vasculh|olhar/.test(lower)) investigate(action);
+      else if (aiPlan?.intent === "explore" || /explor|viaj|ir para|viajar|seguir para|visitar|sair da cidade|novo lugar/.test(lower)) explore(action, aiPlan?.attribute);
+      else if (aiPlan?.intent === "investigate" || /investig|pista|examinar|procur|observar|inspecion|pesquis|vasculh|olhar/.test(lower)) investigate(action, aiPlan?.attribute);
       else if (aiPlan?.intent === "social" || /convers|falar|negoci|convenc|pergunt|persuad|ameaç|blef|mentir|pedir ajuda/.test(lower)) socialAction(action, aiPlan?.attribute);
       else if (aiPlan?.intent === "magic" || /magia|feiti|encant|runa|ritual|arcana/.test(lower)) magicAction(action);
       else if (aiPlan?.intent === "trade" || /compr|vender|loja|mercador|trocar/.test(lower)) tradeAction(action);
+      else if (game.postgame && aiPlan?.intent === "contract") generateContract();
+      else if (game.postgame && aiPlan?.intent === "train") postgameAction("treinar mentor");
       else if (game.postgame) postgameAction(action);
-      else freeAction(action);
+      else freeAction(action, aiPlan?.attribute);
     }
     advanceTime();
     persist();
     renderGame();
   }
 
-  function freeAction(action) {
-    const attribute = attributeFor(action);
+  function freeAction(action, plannedAttribute = null) {
+    const attribute = AI_ATTRIBUTES.has(plannedAttribute) ? plannedAttribute : attributeFor(action);
     const result = testAction(action, attribute, 11 + Math.min(5, Math.floor(game.turns / 8)));
     addStory(testNarration(result, action, attribute));
     if (result.success) {
@@ -511,8 +513,8 @@ REGRAS IMPORTANTES:
     }
   }
 
-  function investigate(action) {
-    const attribute = attributeFor(action);
+  function investigate(action, plannedAttribute = null) {
+    const attribute = AI_ATTRIBUTES.has(plannedAttribute) ? plannedAttribute : attributeFor(action);
     const result = testAction(action, attribute, 12);
     addStory(testNarration(result, action, attribute));
     if (result.success) {
@@ -577,9 +579,10 @@ REGRAS IMPORTANTES:
     addStory("O comerciante oferece poções de cura por 12 moedas. Você também pode vender objetos comuns por algumas moedas. Descreva o que deseja comprar ou negociar.");
   }
 
-  function explore(action) {
-    const result = testAction(action, "agilidade", 10);
-    addStory(testNarration(result, action, "agilidade"));
+  function explore(action, plannedAttribute = null) {
+    const attribute = AI_ATTRIBUTES.has(plannedAttribute) ? plannedAttribute : "agilidade";
+    const result = testAction(action, attribute, 10);
+    addStory(testNarration(result, action, attribute));
     if (result.success) {
       moveLocation();
       addStory(`Após um trecho de viagem, você chega a ${game.location}. ${pick(["Há vozes vindo de uma estalagem.", "Marcas recentes cruzam o caminho.", "O vento traz cheiro de chuva e fumaça.", "Um viajante observa você de longe.", "Uma construção antiga aparece entre as árvores."])}`);
