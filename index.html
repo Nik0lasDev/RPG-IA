@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111714">
+  <meta name="description" content="RPG de fantasia interativo com criação de personagem, dados, escolhas livres, combate e campanhas rejogáveis.">
+  <title>Crônicas — RPG de mesa</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Crônicas, início"><span class="brand-mark">✦</span><span>CRÔNICAS<small>RPG DE MESA</small></span></a>
+      <div class="topbar-actions"><span class="save-status" id="save-status">Jogo local</span><button class="button button-quiet" id="new-campaign-top" type="button">Nova campanha</button></div>
+    </header>
+
+    <main>
+      <section id="start-screen" class="screen start-screen">
+        <div class="hero-copy">
+          <p class="eyebrow">UM MUNDO QUE RESPONDE ÀS SUAS ESCOLHAS</p>
+          <h1>As lendas não<br><em>estão escritas.</em></h1>
+          <p class="hero-text">Crie seu herói, role os dados e conte uma história que não depende de opções prontas. Cada campanha recebe um objetivo, personagens e consequências próprios.</p>
+          <button class="button button-primary button-large" id="begin-creation" type="button">Criar personagem <span aria-hidden="true">→</span></button>
+          <div class="feature-row"><span>◈ Escolhas livres</span><span>⚄ Dados reais</span><span>∞ Pós-campanha</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="moon"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div><div class="tower"><i></i></div><div class="hero-silhouette"><i></i></div><div class="art-caption">AS TERRAS DE ELDORIA <span>•</span> ANO 742</div></div>
+        <div class="start-footer"><span>UM RPG NARRATIVO INSPIRADO EM JOGOS DE MESA</span><span>SEU DESTINO. SUAS REGRAS.</span></div>
+      </section>
+
+      <section id="creation-screen" class="screen creation-screen hidden">
+        <div class="section-heading"><p class="eyebrow">PRIMEIRO CAPÍTULO · 01</p><h2>Quem será sua lenda?</h2><p>Monte seu personagem. Nenhuma classe define todas as suas escolhas.</p></div>
+        <form id="character-form">
+          <div class="creation-grid">
+            <div class="panel character-basics">
+              <label class="field-label" for="character-name">Nome do personagem</label>
+              <input id="character-name" maxlength="32" placeholder="Ex.: Kael, o Errante" required>
+              <span class="field-label">Escolha uma classe</span>
+              <div class="class-grid" id="class-options"></div>
+              <div class="class-detail" id="class-detail" aria-live="polite"></div>
+              <label class="field-label" for="origin-select">Origem</label>
+              <select id="origin-select"><option value="viajante">Viajante — conhece estradas e rumores</option><option value="nobre">Nobre caído — contatos e etiqueta</option><option value="sobrevivente">Sobrevivente — instinto e resistência</option><option value="estudioso">Estudioso — conhecimento antigo</option><option value="mercenario">Mercenário — experiência de combate</option></select>
+              <label class="field-label" for="background-input">Passado (opcional)</label>
+              <textarea id="background-input" rows="3" maxlength="240" placeholder="De onde veio? O que teme? O que procura?"></textarea>
+            </div>
+            <div class="panel attributes-panel">
+              <div class="panel-title-row"><div><span class="eyebrow">ATRIBUTOS</span><h3>Distribua seus pontos</h3></div><span class="points-pill"><b id="points-left">12</b> pontos</span></div>
+              <p class="muted small">Cada atributo começa em 1. Distribua 12 pontos extras. Máximo inicial: 5 por atributo.</p>
+              <div id="attribute-list" class="attribute-list"></div>
+              <div class="attribute-footer"><span>Os atributos afetam testes e combates.</span><button class="text-button" type="button" id="reset-attributes">Redistribuir</button></div>
+            </div>
+            <div class="panel skills-panel">
+              <div class="panel-title-row"><div><span class="eyebrow">TALENTO INICIAL</span><h3>Escolha duas habilidades</h3></div><span class="points-pill"><b id="skills-count">0</b>/2</span></div>
+              <div class="skill-grid" id="skill-options"></div>
+            </div>
+            <div class="panel campaign-panel">
+              <span class="eyebrow">A PRÓXIMA AVENTURA</span><h3>Que tipo de história?</h3>
+              <div class="campaign-options"><label><input type="radio" name="tone" value="fantasia" checked><span><b>Fantasia épica</b><small>Reinos, ruínas e magia</small></span></label><label><input type="radio" name="tone" value="sombria"><span><b>Fantasia sombria</b><small>Segredos, perigo e sacrifícios</small></span></label><label><input type="radio" name="tone" value="exploracao"><span><b>Exploração</b><small>Descobertas e terras selvagens</small></span></label><label><input type="radio" name="tone" value="intriga"><span><b>Intriga</b><small>Facções, mentiras e política</small></span></label></div>
+              <label class="field-label" for="campaign-seed">Semente da campanha (opcional)</label><input id="campaign-seed" maxlength="48" placeholder="Deixe vazio para sortear um mundo">
+              <p class="muted small">Cada campanha gera uma missão central diferente. Depois dela, o mundo continua aberto.</p>
+            </div>
+          </div>
+          <div class="creation-actions"><button type="button" class="button button-quiet" id="back-to-start">Voltar</button><button class="button button-primary button-large" type="submit">Iniciar aventura <span aria-hidden="true">→</span></button></div>
+        </form>
+      </section>
+
+      <section id="game-screen" class="screen game-screen hidden">
+        <div class="game-heading"><div><p class="eyebrow" id="chapter-label">CAPÍTULO I</p><h2 id="campaign-title">As cinzas do destino</h2><p id="campaign-subtitle" class="muted"></p></div><button class="button button-quiet" id="character-sheet-toggle" type="button">Ficha do herói</button></div>
+        <div class="game-layout">
+          <aside class="sidebar">
+            <div class="panel hero-card"><div class="hero-avatar" id="hero-avatar">✦</div><h3 id="hero-name">Aventureiro</h3><p id="hero-class" class="muted"></p><div class="level-line"><span>Nível <b id="hero-level">1</b></span><span><b id="hero-xp">0</b> XP</span></div><div class="stat-bar"><div class="bar-label"><span>Vida</span><b id="hp-label">24 / 24</b></div><div class="bar-track"><div id="hp-bar" class="bar-fill hp-fill"></div></div></div><div class="stat-bar"><div class="bar-label"><span>Energia</span><b id="energy-label">10 / 10</b></div><div class="bar-track"><div id="energy-bar" class="bar-fill energy-fill"></div></div></div><div class="mini-stats" id="mini-stats"></div></div>
+            <div class="panel objective-card"><span class="eyebrow">OBJETIVO PRINCIPAL</span><h3 id="objective-title">O mistério aguarda</h3><p id="objective-text"></p><div class="objective-progress"><span id="objective-state">EM ANDAMENTO</span><span id="objective-progress-label">0/3 pistas</span></div></div>
+            <div class="panel inventory-card"><div class="panel-title-row"><h3>Inventário</h3><span class="muted small" id="gold-count">0 ouro</span></div><div id="inventory-list" class="inventory-list"></div></div>
+            <div class="panel dice-card"><h3>Dados de mesa</h3><p class="muted small">Role um dado para resolver uma situação ou por diversão.</p><div class="dice-buttons"><button type="button" data-die="2">D2</button><button type="button" data-die="6">D6</button><button type="button" data-die="20">D20</button><button type="button" data-die="100">D100</button></div><p id="dice-result" class="dice-result" aria-live="polite">Escolha um dado.</p></div>
+          </aside>
+          <div class="story-column">
+            <div class="panel story-panel"><div class="story-topline"><span id="location-label">O caminho</span><span id="time-label">DIA 1 · MANHÃ</span></div><div id="story-log" class="story-log" aria-live="polite"></div><div id="suggestion-area" class="suggestion-area"></div><form id="action-form" class="action-form"><label for="player-action">O que você faz?</label><div class="action-input-row"><textarea id="player-action" rows="2" maxlength="500" placeholder="Digite qualquer ação: investigar a porta, negociar com o guarda, atacar..." required></textarea><button class="button button-primary" type="submit">Agir <span aria-hidden="true">↗</span></button></div><p class="input-hint">Você pode escrever qualquer ação. O mundo interpreta sua intenção e aplica testes, custos e consequências.</p></form></div>
+            <div class="game-bottom-grid"><div class="panel recent-events"><h3>Crônica da jornada</h3><div id="event-list"></div></div><div class="panel world-actions"><h3>Além da missão</h3><p class="muted small">O mundo continua vivo depois do objetivo principal.</p><button class="button button-outline full-width" id="explore-world" type="button">Explorar o mundo</button><button class="button button-outline full-width" id="rest-action" type="button">Descansar e recuperar</button><button class="button button-outline full-width" id="save-export" type="button">Exportar save</button><label class="button button-outline full-width import-label" for="save-import">Importar save<input id="save-import" type="file" accept=".json,application/json" hidden></label></div></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>CRÔNICAS · RPG NARRATIVO</span><span>Suas decisões deixam marcas.</span></footer>
+  </div>
+  <dialog id="sheet-dialog" class="sheet-dialog"><div class="dialog-heading"><div><p class="eyebrow">FICHA DE PERSONAGEM</p><h2 id="sheet-title">Seu herói</h2></div><button id="close-sheet" class="icon-button" type="button" aria-label="Fechar ficha">×</button></div><div id="sheet-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
